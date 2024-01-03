@@ -207,3 +207,30 @@ def update_page_without_children(database_id, properties):
         "properties": properties,
     }
     return notion_patch(url, data)
+
+
+def copy_schema(parent_database_id, original_database_id, new_schema_title):
+    """
+    Notionのデータベースのスキーマをコピーする
+    【要注意】relation, rollupはrich_textに変換する
+    :param parent_database_id:
+    :param original_database_id:
+    :param new_schema_title:
+    :return:
+    """
+    original_schema = read_schema(original_database_id)
+    new_properties = {}
+    for key, type_setting in original_schema['properties'].items():
+        if key == 'id':
+            continue
+        type_ = type_setting['type']
+        if type_ in ('relation', 'rollup'):
+            type_ = 'rich_text'
+        if type_ not in ('select', 'multi_select'):
+            option = {}
+        else:
+            option = {'options': type_setting[type_]['options']}
+        new_properties[key] = {
+            type_: option
+        }
+    return create_database(parent_database_id, new_schema_title, new_properties)
