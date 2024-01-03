@@ -19,29 +19,12 @@ def copy_github_schema():
         if key == 'id':
             continue
         type_ = type_setting['type']
-        if type_ == 'relation':
+        if type_ in ('relation', 'rollup'):
             type_ = 'rich_text'
-        option = {}
-        if key == 'Release status':
-            option = {
-                'options': [
-                    {
-                        'name': 'closed'
-                    },
-                    {
-                        'name': 'リリース完了/中（main）'
-                    },
-                    {
-                        'name': 'リリース待（release scheduled）'
-                    },
-                    {
-                        'name': 'PVリリース済（preview）'
-                    },
-                    {
-                        'name': '作業中（in progress）'
-                    },
-                ]
-            }
+        if type_ not in ('select', 'multi_select'):
+            option = {}
+        else:
+            option = {'options': type_setting[type_]['options']}
         new_properties[key] = {
             type_: option
         }
